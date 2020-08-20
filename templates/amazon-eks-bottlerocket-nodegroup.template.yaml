@@ -223,7 +223,7 @@ Parameters:
     AllowedPattern: ^[0-9a-zA-Z-/.]*$
     ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
       uppercase letters, hyphens (-), dots(.) and forward slash (/).
-    Default: quickstart-amazon-eks/
+    Default: quickstart-amazon-eks-nodegroup/
     Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
       can include numbers, lowercase letters, uppercase letters, hyphens (-), dots(.) and
       forward slash (/).
@@ -344,65 +344,65 @@ Mappings:
       BTLRCKTK117: BTLRCKTEKS117
   AWSAMIRegionMap:
     ap-northeast-1:
-      BTLRCKTEKS117:
-      BTLRCKTEKS116:
-      BTLRCKTEKS115:
+      BTLRCKTEKS117: ami-027622c08002bc430
+      BTLRCKTEKS116: ami-01ccf737aa59cf748
+      BTLRCKTEKS115: ami-05d9045668df5b849
     ap-northeast-2:
-      BTLRCKTEKS117:
-      BTLRCKTEKS116:
-      BTLRCKTEKS115:
+      BTLRCKTEKS117: ami-0b2973311d80ec8e3
+      BTLRCKTEKS116: ami-0175a54a20fb03342
+      BTLRCKTEKS115: ami-0f1f2855a11c83b8e
     ap-south-1:
-      BTLRCKTEKS117:
-      BTLRCKTEKS116:
-      BTLRCKTEKS115:
+      BTLRCKTEKS117: ami-0225be683dae9d9bf
+      BTLRCKTEKS116: ami-00b1b0853c5162c3e
+      BTLRCKTEKS115: ami-04b088aa9f4fe1464
     ap-southeast-1:
-      BTLRCKTEKS117:
-      BTLRCKTEKS116:
-      BTLRCKTEKS115:
+      BTLRCKTEKS117: ami-023e5828479473621
+      BTLRCKTEKS116: ami-0e0e90aa09c6c8eee
+      BTLRCKTEKS115: ami-00ca632aa3e851b11
     ap-southeast-2:
-      BTLRCKTEKS117:
-      BTLRCKTEKS116:
-      BTLRCKTEKS115:
+      BTLRCKTEKS117: ami-0fd46e905110f616c
+      BTLRCKTEKS116: ami-03564e08a25bca2c5
+      BTLRCKTEKS115: ami-085927c9eede198f6
     ca-central-1:
-      BTLRCKTEKS117:
-      BTLRCKTEKS116:
-      BTLRCKTEKS115:
+      BTLRCKTEKS117: ami-0ca7a7a63be4a98e0
+      BTLRCKTEKS116: ami-0d1e44e79cb01129e
+      BTLRCKTEKS115: ami-0eac5b34df3eee562
     eu-central-1:
-      BTLRCKTEKS117:
-      BTLRCKTEKS116:
-      BTLRCKTEKS115:
+      BTLRCKTEKS117: ami-0b9c05e98f2db6dc2
+      BTLRCKTEKS116: ami-07422a43d47dda38f
+      BTLRCKTEKS115: ami-05494992ec12ada22
     eu-north-1:
-      BTLRCKTEKS117:
-      BTLRCKTEKS116:
-      BTLRCKTEKS115:
+      BTLRCKTEKS117: ami-0942ff0b10bfc30fa
+      BTLRCKTEKS116: ami-0234f9f300a4c5641
+      BTLRCKTEKS115: ami-072aad0187479dcfa
     eu-west-1:
-      BTLRCKTEKS117:
-      BTLRCKTEKS116:
-      BTLRCKTEKS115:
+      BTLRCKTEKS117: ami-07ca3b43c106a66c7
+      BTLRCKTEKS116: ami-09dbe34527b640d93
+      BTLRCKTEKS115: ami-071e5f83fb1156e3f
     eu-west-2:
-      BTLRCKTEKS117:
-      BTLRCKTEKS116:
-      BTLRCKTEKS115:
+      BTLRCKTEKS117: ami-0a3273a6fc72d4f7d
+      BTLRCKTEKS116: ami-00db3d87f72932afa
+      BTLRCKTEKS115: ami-04d9937220162e77d
     eu-west-3:
-      BTLRCKTEKS117:
-      BTLRCKTEKS116:
-      BTLRCKTEKS115:
+      BTLRCKTEKS117: ami-021224fad620912ae
+      BTLRCKTEKS116: ami-03f2e56c80835b4a1
+      BTLRCKTEKS115: ami-0924a537138013218
     sa-east-1:
-      BTLRCKTEKS117:
-      BTLRCKTEKS116:
-      BTLRCKTEKS115:
+      BTLRCKTEKS117: ami-0656542b1572ae3d4
+      BTLRCKTEKS116: ami-0dd8a1f8ea1be5161
+      BTLRCKTEKS115: ami-0f857fd4bf71a10c0
     us-east-1:
-      BTLRCKTEKS117:
-      BTLRCKTEKS116:
-      BTLRCKTEKS115:
+      BTLRCKTEKS117: ami-00c844831631d2593
+      BTLRCKTEKS116: ami-0fe40b4c0c2e158e3
+      BTLRCKTEKS115: ami-0f59b95a5ff044342
     us-east-2:
-      BTLRCKTEKS117:
-      BTLRCKTEKS116:
-      BTLRCKTEKS115:
+      BTLRCKTEKS117: ami-068ed1c8e99b4810c
+      BTLRCKTEKS116: ami-0819aa96a9505bec2
+      BTLRCKTEKS115: ami-03c3a3daa39277e21
     us-west-2:
-      BTLRCKTEKS117:
-      BTLRCKTEKS116: ami-0873e0af67a43e56b
-      BTLRCKTEKS115: ami-00cc14582a24ed470
+      BTLRCKTEKS117: ami-02e48b84c026c35ff
+      BTLRCKTEKS116: ami-0e5e94a421793b1d8
+      BTLRCKTEKS115: ami-02c44e8e1d5373b2c
 Resources:
   CleanupSecurityGroupDependencies:
     Condition: CleanupSGs
@@ -463,14 +463,14 @@ Resources:
       IpProtocol: tcp
       ToPort: 443
       FromPort: 443
-  NodeGroup:
+  BtlRktNodeGroup:
     Metadata:
       DependsOn: !If [ CleanupSGs, !Ref CleanupSecurityGroupDependencies, !Ref "AWS::NoValue" ]
       DependsOn2: !If [ EnableProxy, !Ref ConfigureProxy, !Ref "AWS::NoValue" ]
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       DesiredCapacity: !Ref NumberOfNodes
-      LaunchConfigurationName: !Ref NodeLaunchConfig
+      LaunchConfigurationName: !Ref BtlRktNodeLaunchConfig
       MinSize: !Ref NumberOfNodes
       MaxSize: !If [ MaxNodes, !Ref MaxNumberOfNodes, !Ref NumberOfNodes ]
       VPCZoneIdentifier: !If
@@ -512,7 +512,7 @@ Resources:
       HttpProxy: !Ref HttpProxy
       VpcId: !Ref VPCID
       ClusterName: !Ref EKSControlPlane
-  NodeLaunchConfig:
+  BtlRktNodeLaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Metadata:
       AWS::CloudFormation::Authentication:
