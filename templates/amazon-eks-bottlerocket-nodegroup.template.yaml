@@ -65,8 +65,6 @@ Metadata:
         default: Number of nodes
       MaxNumberOfNodes:
         default: Maximum number of nodes
-      NodeAMIOS:
-        default: Node AMI operating system
       NodeGroupName:
         default: Node group name
       NodeVolumeSize:
