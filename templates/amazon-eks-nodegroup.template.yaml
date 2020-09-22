@@ -148,11 +148,6 @@ Parameters:
     Type: String
     Default: ""
     Description: (Optional) Specify the host name for an HTTP proxy to use for outbound internet access.
-  ClusterAutoscaler:
-    Type: String
-    AllowedValues: ["Enabled", "Disabled"]
-    Default: "Enabled"
-    Description: Choose "Disabled" to skip adding the cluster autoscaler tags to this node group.
   NodeGroupType:
     Type: String
     AllowedValues: [ Managed, Unmanaged ]
@@ -354,18 +349,12 @@ Resources:
         - Key: !Sub 'kubernetes.io/cluster/${EKSClusterName}'
           Value: 'owned'
           PropagateAtLaunch: true
-        - !If
-          - EnableClusterAutoscaler
-          - Key: k8s.io/cluster-autoscaler/enabled
-            Value: 'true'
-            PropagateAtLaunch: true
-          - !Ref 'AWS::NoValue'
-        - !If
-          - EnableClusterAutoscaler
-          - Key: !Sub 'k8s.io/cluster-autoscaler/${EKSClusterName}'
-            Value: ''
-            PropagateAtLaunch: true
-          - !Ref 'AWS::NoValue'
+        - Key: k8s.io/cluster-autoscaler/enabled
+          Value: 'true'
+          PropagateAtLaunch: true
+        - Key: !Sub 'k8s.io/cluster-autoscaler/${EKSClusterName}'
+          Value: ''
+          PropagateAtLaunch: true
       VPCZoneIdentifier: !If
         - 3AZDeployment
         - [ !Ref Subnet1ID, !Ref Subnet2ID, !Ref Subnet3ID ]
