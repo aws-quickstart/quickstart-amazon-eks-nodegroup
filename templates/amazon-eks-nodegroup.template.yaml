@@ -25,7 +25,6 @@ Metadata:
           - MaxNumberOfNodes
           - NodeGroupName
           - NodeVolumeSize
-          - ClusterAutoscaler
     ParameterLabels:
       KeyPairName:
         default: SSH key name
@@ -53,8 +52,6 @@ Metadata:
         default: Custom AMI id
       HttpProxy:
         default: HTTP proxy
-      ClusterAutoscaler:
-        default: Cluster autoscaler
   LintSpellExclude:
     - Managed Node Group
     - files/bootstrap.sh
@@ -186,7 +183,6 @@ Conditions:
   IsArm: !Equals [!Ref NodeInstanceFamily, "ARM"]
   IsGpu: !Equals [!Ref NodeInstanceFamily, "GPU"]
   CreateNodeSecurityGroup: !Equals [!Ref NodeSecurityGroupId, ""]
-  EnableClusterAutoscaler: !Not [!Equals [!Ref ClusterAutoscaler, ""]]
   MaxNodesDefined: !Not [!Equals [!Ref MaxNumberOfNodes, ""]]
   1Type: !Equals [!Ref NodeInstanceType2, ""]
   2Type: !Not [!Equals [!Ref NodeInstanceType2, ""]]
