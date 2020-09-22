@@ -14,7 +14,6 @@ Metadata:
         Parameters:
           - KeyPairName
           - NodeGroupOS
-          - NodeInstanceRoleName
           - HttpProxy
           - CustomAmiId
       - Label:
@@ -50,8 +49,6 @@ Metadata:
         default: Node group name
       NodeVolumeSize:
         default: Node volume size
-      NodeInstanceRoleName:
-        default: Node instance role name
       CustomAmiId:
         default: Custom AMI id
       HttpProxy:
@@ -181,8 +178,6 @@ Parameters:
     Default: 100
     Type: Number
     Description: Only applies if "Node group type" is set to "Unmanaged." Set the percentage of on demand Instances and spot instances. With the default of 100, the percentages are 100% for on demand instances and 0% for spot instances.
-  NodeInstanceRoleName:
-    Type: String
 Conditions:
   IsAL2: !Equals [!Ref NodeGroupOS, 'Amazon Linux 2']
   IsWindows: !Equals [!Ref NodeGroupOS, 'Windows']
@@ -228,14 +223,18 @@ Resources:
     Type: Custom::CliQuery
     Properties:
       ServiceToken: !Sub ['arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${Prefix}-ResourceReader', {Prefix: !FindInMap [Config, Prefix, Value]}]
-      AwsCliCommand: !Sub "iam get-role --role-name ${NodeInstanceRoleName} --query 'Role'"
+      AwsCliCommand: !Sub
+        - "iam get-role --role-name ${NodeInstanceRoleName} --query 'Role'"
+        - NodeInstanceRoleName: !Sub ['${Prefix}-NodeInstance', {Prefix: !FindInMap [Config, Prefix, Value]}]
       IdField: 'Arn'
   NodeInstanceProfileArn:
     Condition: IsUnmanaged
     Type: Custom::CliQuery
     Properties:
       ServiceToken: !Sub ['arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${Prefix}-ResourceReader', {Prefix: !FindInMap [Config, Prefix, Value]}]
-      AwsCliCommand: !Sub "iam list-instance-profiles --query 'InstanceProfiles[].{role: Roles[0].RoleName, arn: Arn}[?role==`${NodeInstanceRoleName}`] | [0]'"
+      AwsCliCommand: !Sub
+        - "iam list-instance-profiles --query 'InstanceProfiles[].{role: Roles[0].RoleName, arn: Arn}[?role==`${NodeInstanceRoleName}`] | [0]'"
+        - NodeInstanceRoleName: !Sub ['${Prefix}-NodeInstance', {Prefix: !FindInMap [Config, Prefix, Value]}]
       IdField: 'arn'
   ClusterInfo:
     Type: Custom::CliQuery
