@@ -232,12 +232,18 @@ Resources:
         - "iam list-instance-profiles --query 'InstanceProfiles[].{role: Roles[0].RoleName, arn: Arn}[?role==`${NodeInstanceRoleName}`] | [0]'"
         - NodeInstanceRoleName: !Sub ['${Prefix}-NodeInstance', {Prefix: !FindInMap [Config, Prefix, Value]}]
       IdField: 'arn'
-  ClusterInfo:
+  ClusterEndpoint:
     Type: Custom::CliQuery
     Properties:
       ServiceToken: !Sub ['arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${Prefix}-ResourceReader', {Prefix: !FindInMap [Config, Prefix, Value]}]
       AwsCliCommand: !Sub "eks describe-cluster --name ${EKSClusterName} --query '{Endpoint: cluster.endpoint, CaData: cluster.certificateAuthority.data}'"
       IdField: 'Endpoint'
+  ClusterCaData:
+    Type: Custom::CliQuery
+    Properties:
+      ServiceToken: !Sub ['arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${Prefix}-ResourceReader', {Prefix: !FindInMap [Config, Prefix, Value]}]
+      AwsCliCommand: !Sub "eks describe-cluster --name ${EKSClusterName} --query '{Endpoint: cluster.endpoint, CaData: cluster.certificateAuthority.data}'"
+      IdField: 'CaData'
   EksClusterSecurityGroupId:
     Type: Custom::CliQuery
     Properties:
@@ -439,7 +445,7 @@ Resources:
                 [string]$EKSBootstrapScriptName = 'Start-EKSBootstrap.ps1'
                 [string]$EKSBootstrapScriptFile = "$EKSBinDir\$EKSBootstrapScriptName"
                 [string]$cfn_signal = "$env:ProgramFiles\Amazon\cfn-bootstrap\cfn-signal.exe"
-                & $EKSBootstrapScriptFile -EKSClusterName ${EKSClusterName} -APIServerEndpoint ${ClusterInfo} -Base64ClusterCA  ${ClusterInfo.CaData} ${BootstrapArguments} 3>&1 4>&1 5>&1 6>&1
+                & $EKSBootstrapScriptFile -EKSClusterName ${EKSClusterName} -APIServerEndpoint ${ClusterEndpoint} -Base64ClusterCA  ${ClusterCaData} ${BootstrapArguments} 3>&1 4>&1 5>&1 6>&1
                 $LastError = if ($?) { 0 } else { $Error[0].Exception.HResult }
                 & $cfn_signal --exit-code=$LastError `
                 --stack="${AWS::StackName}" `
@@ -458,8 +464,8 @@ Resources:
               - !Sub
                 - |
                   [settings.kubernetes]
-                  api-server = "${ClusterInfo}"
-                  cluster-certificate = "${ClusterInfo.CaData}"
+                  api-server = "${ClusterEndpoint}"
+                  cluster-certificate = "${ClusterCaData}"
                   cluster-name = "${EKSClusterName}"
                   ${LabelsArg}
                   ${TaintsArg}
@@ -491,8 +497,8 @@ Resources:
                   }
                   ${ProxySetup}
                   /etc/eks/bootstrap.sh ${EKSClusterName} ${ExtraArgs} \
-                                    --b64-cluster-ca ${ClusterInfo.CaData} \
-                                    --apiserver-endpoint ${ClusterInfo}  || signal 1
+                                    --b64-cluster-ca ${ClusterCaData} \
+                                    --apiserver-endpoint ${ClusterEndpoint}  || signal 1
                   ${ProxyPostSetup}
                   signal $?
                 - ExtraArgs: !If
