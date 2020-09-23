@@ -384,7 +384,7 @@ Resources:
         MinInstancesInService: !If [IsSingleInstance, 0, 1]
         MaxBatchSize: 1
         WaitOnResourceSignals: !If [IsBottlerocket, false, true]
-        PauseTime: PT15M
+        PauseTime: !If [IsBottlerocket, PT3M, PT15M]
   ManagedNodeGroup:
     Condition: IsManaged
     Type: AWS::EKS::Nodegroup
