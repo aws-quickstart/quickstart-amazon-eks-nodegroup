@@ -150,6 +150,7 @@ Parameters:
   NodeInstanceFamily:
     AllowedValues: ['Standard', 'ARM', 'GPU']
     Type: String
+    Default: 'Standard'
     Description: Choose "ARM" to use an ARM based AMI, choose "GPU" to use an AMI that supports GPU and Inferentia based instance types. Ignored if "Custom launch template" is provided.
   LaunchTemplateId:
     Default: ""
