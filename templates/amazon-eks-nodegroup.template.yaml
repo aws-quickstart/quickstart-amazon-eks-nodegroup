@@ -239,7 +239,7 @@ Resources:
       ServiceToken: !Sub ['arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${Prefix}-ResourceReader', {Prefix: !FindInMap [Config, Prefix, Value]}]
       AwsCliCommand: !Sub "eks describe-cluster --name ${EKSClusterName} --query '{Endpoint: cluster.endpoint, CaData: cluster.certificateAuthority.data}'"
       IdField: 'Endpoint'
-  NodeSecurityGroup:
+  ClusterNodeSecurityGroup:
     Type: Custom::CliQuery
     Properties:
       ServiceToken: !Sub ['arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${Prefix}-ResourceReader', {Prefix: !FindInMap [Config, Prefix, Value]}]
@@ -261,7 +261,7 @@ Resources:
     Type: Custom::Cleanup
     Properties:
       ServiceToken: !Sub ['arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${Prefix}-CleanupSecurityGroupDependencies', {Prefix: !FindInMap [Config, Prefix, Value]}]
-      SecurityGroups: !If [UseClusterNodeSecurityGroup, !Ref NodeSecurityGroup, !Ref NodeSecurityGroupId]
+      SecurityGroups: !If [UseClusterNodeSecurityGroup, !Ref ClusterNodeSecurityGroup, !Ref NodeSecurityGroupId]
   ManagedASG:
     Condition: IsManaged
     DependsOn: ManagedNodeGroup
@@ -382,7 +382,7 @@ Resources:
             AssociatePublicIpAddress: false
             Description: String
             Groups:
-              - !If [UseClusterNodeSecurityGroup, !Ref NodeSecurityGroup, !Ref NodeSecurityGroupId]
+              - !If [UseClusterNodeSecurityGroup, !Ref ClusterNodeSecurityGroup, !Ref NodeSecurityGroupId]
         ImageId: !If
           - UseCustomAmi
           - !Ref CustomAmiId
@@ -498,7 +498,7 @@ Resources:
           HttpTokens: optional
 Outputs:
   EKSNodeSecurityGroup:
-    Value: !If [UseClusterNodeSecurityGroup, !Ref NodeSecurityGroup, !Ref NodeSecurityGroupId]
+    Value: !If [UseClusterNodeSecurityGroup, !Ref ClusterNodeSecurityGroup, !Ref NodeSecurityGroupId]
   NodeAutoScalingGroup:
     Value: !If [IsManaged, !Ref ManagedASG, !Ref UnmanagedASG]
 Rules:
