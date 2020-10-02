@@ -171,7 +171,7 @@ Parameters:
   NodeSecurityGroupId:
     Default: ""
     Type: String
-    Description: (Optional) Provide the id of a Security Group to use for this node group. If not specified, one will be created.
+    Description: (Optional) Provide the id of a Security Group to use for this node group. If not specified, the cluster Security Group will be used.
   OndemandPercentage:
     Default: 100
     Type: Number
@@ -183,7 +183,7 @@ Conditions:
   IsUnmanaged: !Equals [!Ref NodeGroupType, Unmanaged]
   IsArm: !Equals [!Ref NodeInstanceFamily, "ARM"]
   IsGpu: !Equals [!Ref NodeInstanceFamily, "GPU"]
-  CreateNodeSecurityGroup: !Equals [!Ref NodeSecurityGroupId, ""]
+  UseClusterNodeSecurityGroup: !Equals [!Ref NodeSecurityGroupId, ""]
   MaxNodesDefined: !Not [!Equals [!Ref MaxNumberOfNodes, ""]]
   1Type: !Equals [!Ref NodeInstanceType2, ""]
   2Type: !Not [!Equals [!Ref NodeInstanceType2, ""]]
@@ -239,6 +239,12 @@ Resources:
       ServiceToken: !Sub ['arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${Prefix}-ResourceReader', {Prefix: !FindInMap [Config, Prefix, Value]}]
       AwsCliCommand: !Sub "eks describe-cluster --name ${EKSClusterName} --query '{Endpoint: cluster.endpoint, CaData: cluster.certificateAuthority.data}'"
       IdField: 'Endpoint'
+  NodeSecurityGroup:
+    Type: Custom::CliQuery
+    Properties:
+      ServiceToken: !Sub ['arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${Prefix}-ResourceReader', {Prefix: !FindInMap [Config, Prefix, Value]}]
+      AwsCliCommand: !Sub "eks describe-cluster --name ${EKSClusterName} --query '{SGID: cluster.resourcesVpcConfig.clusterSecurityGroupId}'"
+      IdField: 'SGID'
   EksClusterSecurityGroupId:
     Type: Custom::CliQuery
     Properties:
@@ -255,7 +261,7 @@ Resources:
     Type: Custom::Cleanup
     Properties:
       ServiceToken: !Sub ['arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${Prefix}-CleanupSecurityGroupDependencies', {Prefix: !FindInMap [Config, Prefix, Value]}]
-      SecurityGroups: !If [CreateNodeSecurityGroup, !Ref NodeSecurityGroup, !Ref NodeSecurityGroupId]
+      SecurityGroups: !If [UseClusterNodeSecurityGroup, !Ref NodeSecurityGroup, !Ref NodeSecurityGroupId]
   ManagedASG:
     Condition: IsManaged
     DependsOn: ManagedNodeGroup
@@ -286,55 +292,6 @@ Resources:
                - OS: !If [IsArm, 'arm64', 'x86_64']
              - !Ref 'AWS::NoValue'
       IdField: 'Value'
-  NodeSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Condition: CreateNodeSecurityGroup
-    Properties:
-      GroupDescription: Security group for all nodes in the node group
-      VpcId: !Ref VPCID
-      Tags:
-        - Key: !Sub "kubernetes.io/cluster/${EKSClusterName}"
-          Value: 'owned'
-  NodeSecurityGroupIngress:
-    Type: AWS::EC2::SecurityGroupIngress
-    Condition: CreateNodeSecurityGroup
-    Properties:
-      Description: Allow nodes to communicate with each other
-      GroupId: !Ref NodeSecurityGroup
-      SourceSecurityGroupId: !Ref NodeSecurityGroup
-      IpProtocol: '-1'
-      FromPort: 0
-      ToPort: 65535
-  NodeSecurityGroupFromControlPlaneIngress:
-    Type: AWS::EC2::SecurityGroupIngress
-    Condition: CreateNodeSecurityGroup
-    Properties:
-      Description: Allow worker Kubelets and pods to receive communication from the cluster control plane
-      GroupId: !Ref NodeSecurityGroup
-      SourceSecurityGroupId: !Ref EksClusterSecurityGroupId
-      IpProtocol: tcp
-      FromPort: 1025
-      ToPort: 65535
-  NodeSecurityGroupFromControlPlaneOn443Ingress:
-    Type: AWS::EC2::SecurityGroupIngress
-    Condition: CreateNodeSecurityGroup
-    Properties:
-      Description: Allow pods running extension API servers on port 443 to receive communication from cluster control plane
-      GroupId: !Ref NodeSecurityGroup
-      SourceSecurityGroupId: !Ref EksClusterSecurityGroupId
-      IpProtocol: tcp
-      FromPort: 443
-      ToPort: 443
-  ClusterControlPlaneSecurityGroupIngress:
-    Type: AWS::EC2::SecurityGroupIngress
-    Condition: CreateNodeSecurityGroup
-    Properties:
-      Description: Allow pods to communicate with the cluster API Server
-      GroupId: !Ref EksClusterSecurityGroupId
-      SourceSecurityGroupId: !Ref NodeSecurityGroup
-      IpProtocol: tcp
-      ToPort: 443
-      FromPort: 443
   UnmanagedASG:
     Type: AWS::AutoScaling::AutoScalingGroup
     Condition: IsUnmanaged
@@ -425,7 +382,7 @@ Resources:
             AssociatePublicIpAddress: false
             Description: String
             Groups:
-              - !If [CreateNodeSecurityGroup, !Ref NodeSecurityGroup, !Ref NodeSecurityGroupId]
+              - !If [UseClusterNodeSecurityGroup, !Ref NodeSecurityGroup, !Ref NodeSecurityGroupId]
         ImageId: !If
           - UseCustomAmi
           - !Ref CustomAmiId
@@ -541,7 +498,7 @@ Resources:
           HttpTokens: optional
 Outputs:
   EKSNodeSecurityGroup:
-    Value: !If [CreateNodeSecurityGroup, !Ref NodeSecurityGroup, !Ref NodeSecurityGroupId]
+    Value: !If [UseClusterNodeSecurityGroup, !Ref NodeSecurityGroup, !Ref NodeSecurityGroupId]
   NodeAutoScalingGroup:
     Value: !If [IsManaged, !Ref ManagedASG, !Ref UnmanagedASG]
 Rules:
