@@ -52,8 +52,6 @@ Metadata:
         default: Custom AMI id
       HttpProxy:
         default: HTTP proxy
-      BootstrapArguments:
-        default: Bootstrap arguments
   LintSpellExclude:
     - Managed Node Group
     - files/bootstrap.sh
@@ -178,10 +176,6 @@ Parameters:
     Default: 100
     Type: Number
     Description: Only applies if "Node group type" is set to "Unmanaged." Set the percentage of on demand Instances and spot instances. With the default of 100, the percentages are 100% for on demand instances and 0% for spot instances.
-  BootstrapArguments:
-    Description: Arguments to pass to the bootstrap script. See files/bootstrap.sh in https://github.com/awslabs/amazon-eks-ami.
-    Type: String
-    Default: ""
 Conditions:
   IsAL2: !Equals [!Ref NodeGroupOS, 'Amazon Linux 2']
   IsWindows: !Equals [!Ref NodeGroupOS, 'Windows']
@@ -417,7 +411,7 @@ Resources:
                     - "-KubeletExtraArgs '${LabelsArg} ${TaintsArg}'"
                     - LabelsArg: !If [AddLabels, !Sub "--node-labels=${Labels}", ""]
                       TaintsArg: !If [AddTaints, !Sub "--register-with-taints=${Taints}", ""]
-                  - !Ref 'BootstrapArguments'
+                  - ""
             - !If
               - IsBottlerocket
               - !Sub
