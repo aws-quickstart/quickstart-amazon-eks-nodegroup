@@ -509,6 +509,13 @@ Outputs:
   NodeAutoScalingGroup:
     Value: !If [IsManaged, !Ref ManagedASG, !Ref UnmanagedASG]
 Rules:
+  WindowsUnmanaged:
+    Assertions:
+      - Assert: !Not [!Equals [NodeGroupOS, 'Windows']]
+        AssertDescription: "Managed nodegroups do not support Windows nodes."
+    RuleCondition: !Equals
+      - !Ref NodeGroupType
+      - Managed
   ArmInstance:
     Assertions:
       - Assert: !Contains
