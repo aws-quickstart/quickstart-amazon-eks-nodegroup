@@ -218,11 +218,15 @@ Resources:
       IdField: 'CidrBlock'
   NodeRoleArn:
     Type: Custom::CliQuery
+    Condition: IsUnmanaged
     Properties:
       ServiceToken: !Sub ['arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${Prefix}-ResourceReader', {Prefix: !FindInMap [Config, Prefix, Value]}]
       AwsCliCommand: !Sub
         - "iam get-role --role-name ${NodeInstanceRoleName} --query 'Role'"
-        - NodeInstanceRoleName: !Sub ['${Prefix}-NodeInstance', {Prefix: !FindInMap [Config, Prefix, Value]}]
+        - NodeInstanceRoleName: !Sub
+          - '${Prefix}-${Suffix}'
+          - Prefix: !FindInMap [Config, Prefix, Value]
+            Suffix: !If [IsManaged, 'ManagedNodeInstance', 'UnmanagedNodeInstance']
       IdField: 'Arn'
   NodeInstanceProfileArn:
     Condition: IsUnmanaged
@@ -231,7 +235,10 @@ Resources:
       ServiceToken: !Sub ['arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${Prefix}-ResourceReader', {Prefix: !FindInMap [Config, Prefix, Value]}]
       AwsCliCommand: !Sub
         - "iam list-instance-profiles --query 'InstanceProfiles[].{role: Roles[0].RoleName, arn: Arn}[?role==`${NodeInstanceRoleName}`] | [0]'"
-        - NodeInstanceRoleName: !Sub ['${Prefix}-NodeInstance', {Prefix: !FindInMap [Config, Prefix, Value]}]
+        - NodeInstanceRoleName: !Sub
+          - '${Prefix}-${Suffix}'
+          - Prefix: !FindInMap [Config, Prefix, Value]
+            Suffix: !If [IsManaged, 'ManagedNodeInstance', 'UnmanagedNodeInstance']
       IdField: 'arn'
   ClusterEndpoint:
     Type: Custom::CliQuery
@@ -353,7 +360,7 @@ Resources:
         Id: !If [CreateLaunchTemplate, !Ref NodeLaunchTemplate, !Ref LaunchTemplateId]
         Version: !If [CreateLaunchTemplate, !GetAtt NodeLaunchTemplate.LatestVersionNumber, !Ref LaunchTemplateVersion]
       NodegroupName: !Ref NodeGroupName
-      NodeRole: !Ref NodeRoleArn
+      NodeRole: !Sub ['${Prefix}-ManagedNodeInstance', {Prefix: !FindInMap [Config, Prefix, Value]}]
       ScalingConfig:
         DesiredSize: !Ref NumberOfNodes
         MaxSize: !If [MaxNodesDefined, !Ref MaxNumberOfNodes, !Ref NumberOfNodes]
