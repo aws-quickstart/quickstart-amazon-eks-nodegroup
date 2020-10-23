@@ -274,7 +274,7 @@ Resources:
     Type: Custom::CliQuery
     Properties:
       ServiceToken: !Sub ['arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${Prefix}-ResourceReader', {Prefix: !FindInMap [Config, Prefix, Value]}]
-      AwsCliCommand: !Sub "autoscaling describe-auto-scaling-groups --query 'AutoScalingGroups[? Tags[? Key==`eks:cluster-name` && Value==`${EKSClusterName}`] && Tags[? Key==`eks:nodegroup-name` && Value==`${ManagedNodeGroup}`]] | [0] | {Id: AutoScalingGroupName}'"
+      AwsCliCommand: !Sub "autoscaling describe-auto-scaling-groups --query 'AutoScalingGroups[? Tags[? Key==`eks:cluster-name` && Value==`${EKSClusterName}`] && Tags[? Key==`eks:nodegroup-name` && Value==`${ManagedNodeGroup.NodegroupName}`]] | [0] | {Id: AutoScalingGroupName}'"
       IdField: 'Id'
   NodeImageId:
     Condition: UseSSmAmi
