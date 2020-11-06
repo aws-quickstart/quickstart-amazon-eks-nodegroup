@@ -12,6 +12,7 @@ Metadata:
       - Label:
           default: Amazon EC2 configuration
         Parameters:
+          - CreateNodeGroup
           - KeyPairName
           - NodeGroupOS
           - HttpProxy
@@ -52,6 +53,8 @@ Metadata:
         default: Custom AMI id
       HttpProxy:
         default: HTTP proxy
+      CreateNodeGroup:
+        default: Create node group
   LintSpellExclude:
     - Managed Node Group
     - files/bootstrap.sh
@@ -176,6 +179,11 @@ Parameters:
     Default: 100
     Type: Number
     Description: Only applies if "Node group type" is set to "Unmanaged." Set the percentage of on demand Instances and spot instances. With the default of 100, the percentages are 100% for on demand instances and 0% for spot instances.
+  CreateNodeGroup:
+    Type: String
+    Default: 'Yes'
+    AllowedValues: ['Yes', 'No']
+    Description: If 'No' the stack will create just the Security Group skipping the node group. This is useful if you manage the node group with third party integration, such as Spot.io
 Conditions:
   IsAL2: !Equals [!Ref NodeGroupOS, 'Amazon Linux 2']
   IsWindows: !Equals [!Ref NodeGroupOS, 'Windows']
@@ -200,6 +208,9 @@ Conditions:
   IsBottlerocket: !Equals [ !Ref NodeGroupOS, "Bottlerocket" ]
   UseCustomAmi: !Not [ !Equals [ !Ref CustomAmiId, "" ] ]
   UseSSmAmi: !Equals [ !Ref CustomAmiId, "" ]
+  CreateNodeGroup: !Equals [ !Ref CreateNodeGroup, 'Yes' ]
+  CreateManagedNodeGroup: !And [ !Condition IsManaged, !Condition CreateNodeGroup ]
+  CreateUnmanagedNodeGroup: !And [ !Condition IsUnmanaged, !Condition CreateNodeGroup ]
 Mappings:
   Config:
     Prefix: { Value: 'eks-quickstart' }
@@ -269,7 +280,7 @@ Resources:
       ServiceToken: !Sub ['arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${Prefix}-CleanupSecurityGroupDependencies', {Prefix: !FindInMap [Config, Prefix, Value]}]
       SecurityGroups: !If [UseClusterNodeSecurityGroup, !Ref ClusterNodeSecurityGroup, !Ref NodeSecurityGroupId]
   ManagedASG:
-    Condition: IsManaged
+    Condition: CreateManagedNodeGroup
     DependsOn: ManagedNodeGroup
     Type: Custom::CliQuery
     Properties:
@@ -300,7 +311,7 @@ Resources:
       IdField: 'Value'
   UnmanagedASG:
     Type: AWS::AutoScaling::AutoScalingGroup
-    Condition: IsUnmanaged
+    Condition: CreateUnmanagedNodeGroup
     Properties:
       DesiredCapacity: !Ref NumberOfNodes
       MaxSize: !If [MaxNodesDefined, !Ref MaxNumberOfNodes, !Ref NumberOfNodes]
@@ -351,7 +362,7 @@ Resources:
         WaitOnResourceSignals: !If [IsBottlerocket, false, true]
         PauseTime: !If [IsBottlerocket, PT3M, PT15M]
   ManagedNodeGroup:
-    Condition: IsManaged
+    Condition: CreateManagedNodeGroup
     Type: AWS::EKS::Nodegroup
     Properties:
       ClusterName: !Ref EKSClusterName
@@ -373,6 +384,7 @@ Resources:
           - [ !Ref Subnet1ID ]
   NodeLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
+    Condition: CreateNodeGroup
     Properties:
       LaunchTemplateData:
         BlockDeviceMappings:
@@ -506,6 +518,7 @@ Outputs:
   EKSNodeSecurityGroup:
     Value: !If [UseClusterNodeSecurityGroup, !Ref ClusterNodeSecurityGroup, !Ref NodeSecurityGroupId]
   NodeAutoScalingGroup:
+    Condition: CreateNodeGroup
     Value: !If [IsManaged, !Ref ManagedASG, !Ref UnmanagedASG]
 Rules:
   WindowsUnmanaged:
