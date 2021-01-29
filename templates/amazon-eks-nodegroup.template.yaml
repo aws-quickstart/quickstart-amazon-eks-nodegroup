@@ -452,7 +452,8 @@ Resources:
                     /opt/aws/bin/cfn-signal --exit-code $1 \
                       --stack  ${AWS::StackName} \
                       --resource UnmanagedASG  \
-                      --region ${AWS::Region}
+                      --region ${AWS::Region} \
+                      --role ${NodeRoleArn}
                   }
                   ${ProxySetup}
                   /etc/eks/bootstrap.sh ${EKSClusterName} ${ExtraArgs} \
