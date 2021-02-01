@@ -465,7 +465,7 @@ Resources:
                       --stack  ${AWS::StackName} \
                       --resource UnmanagedASG  \
                       --region ${AWS::Region} \
-                      --role ${NodeRoleArn}
+                      --role ${NodeInstanceRoleName}
                   }
                   ${ProxySetup}
                   /etc/eks/bootstrap.sh ${EKSClusterName} ${ExtraArgs} \
@@ -511,6 +511,10 @@ Resources:
                       systemctl restart docker
                       systemctl restart kubelet
                     - ""
+                  NodeInstanceRoleName: !Sub
+                    - '${Prefix}-${Suffix}'
+                    - Prefix: !FindInMap [Config, Prefix, Value]
+                      Suffix: !If [IsManaged, 'ManagedNodeInstance', 'UnmanagedNodeInstance']
         MetadataOptions:
           HttpPutResponseHopLimit: 2
           HttpEndpoint: enabled
