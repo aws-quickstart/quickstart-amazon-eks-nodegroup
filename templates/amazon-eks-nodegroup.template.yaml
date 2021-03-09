@@ -184,6 +184,16 @@ Parameters:
     Default: 'Yes'
     AllowedValues: ['Yes', 'No']
     Description: If 'No' the stack will create just the Security Group skipping the node group. This is useful if you manage the node group with third party integration, such as Spot.io
+  WindowsEdition:
+    Type: String
+    AllowedValues: [Core, Full]
+    Default: Core
+    Description: 'The edition of Windows AMI to use for Windows Nodegroups.'
+  WindowsVersion:
+    Type: String
+    AllowedValues: ['2004', '2019']
+    Default: '2004'
+    Description: 'The version of windows to use for Windows Nodegroups.'
 Conditions:
   IsAL2: !Equals [!Ref NodeGroupOS, 'Amazon Linux 2']
   IsWindows: !Equals [!Ref NodeGroupOS, 'Windows']
@@ -301,7 +311,7 @@ Resources:
            - OS: !If [IsArm, 'amazon-linux-2-arm64', !If [IsGpu, 'amazon-linux-2-gpu', 'amazon-linux-2']]
          - !If
            - IsWindows
-           - !Sub '/aws/service/ami-windows-latest/Windows_Server-2019-English-Core-EKS_Optimized-${KubernetesVersion}/image_id'
+           - !Sub '/aws/service/ami-windows-latest/Windows_Server-${WindowsVersion}-English-${WindowsEdition}-EKS_Optimized-${KubernetesVersion}/image_id'
            - !If
              - IsBottlerocket
              - !Sub
