@@ -194,11 +194,19 @@ Parameters:
     AllowedValues: ['2004', '2019']
     Default: '2004'
     Description: 'The version of windows to use for Windows Nodegroups.'
-  RestrictNodeIamRole:
+  EC2MetadataPutResponseHopLimit:
     Type: String
-    AllowedValues: [Disabled, Enabled]
-    Default: Disabled
-    Description: Enabling the parameter blocks pods from accessing the NodeGroup's IAM instance profile. Only applies if LaunchTemplateId is blank. Do not enable this option if the aws-node daemonset has not been configured to use IRSA.
+    Default: "1"
+    Description: The desired HTTP PUT response hop limit for instance metadata requests. The larger the number, the further instance metadata requests can travel.
+  EC2MetadataHttpTokens:
+    Type: String
+    AllowedValues: [optional, required]
+    Default: optional
+    Description: >
+      If set to "optional" pods will be able to use the node's IAM instance profile.
+      If set to "required" amd "EC2MetadataPutResponseHopLimit" is set to 1, pods will not be able to access the nodes IAM role.
+      If set to "required" amd "EC2MetadataPutResponseHopLimit" is set greater than 1 pods must send a signed token header with any instance metadata retrieval requests.
+      NOTE: This will default to "required" in the next major release.
 Conditions:
   IsAL2: !Equals [!Ref NodeGroupOS, 'Amazon Linux 2']
   IsWindows: !Equals [!Ref NodeGroupOS, 'Windows']
@@ -226,7 +234,6 @@ Conditions:
   CreateNodeGroup: !Equals [ !Ref CreateNodeGroup, 'Yes' ]
   CreateManagedNodeGroup: !And [ !Condition IsManaged, !Condition CreateNodeGroup ]
   CreateUnmanagedNodeGroup: !And [ !Condition IsUnmanaged, !Condition CreateNodeGroup ]
-  RestrictMetadata: !Equals [ !Ref RestrictNodeIamRole, Enabled ]
 Mappings:
   Config:
     Prefix: { Value: 'eks-quickstart' }
@@ -532,9 +539,9 @@ Resources:
                     - Prefix: !FindInMap [Config, Prefix, Value]
                       Suffix: !If [IsManaged, 'ManagedNodeInstance', 'UnmanagedNodeInstance']
         MetadataOptions:
-          HttpPutResponseHopLimit: !If [RestrictMetadata, 1, 2]
+          HttpPutResponseHopLimit: !Ref EC2MetadataPutResponseHopLimit
           HttpEndpoint: enabled
-          HttpTokens: !If [RestrictMetadata, required, optional]
+          HttpTokens: !Ref EC2MetadataHttpTokens
 Outputs:
   EKSNodeSecurityGroup:
     Value: !If [UseClusterNodeSecurityGroup, !Ref ClusterNodeSecurityGroup, !Ref NodeSecurityGroupId]
