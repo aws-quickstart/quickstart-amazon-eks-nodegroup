@@ -79,8 +79,9 @@ Metadata:
   cfn-lint: { config: { ignore_checks: [W2030, W9002, W9003, W9004, E3008, W9006]}}
 Parameters:
   KeyPairName:
-    Description: Name of an existing EC2 key pair. All instances will launch with this key pair. Ignored if "Custom launch template" is provided.
-    Type: AWS::EC2::KeyPair::KeyName
+    Description: Name of an existing EC2 key pair. All instances will launch with this key pair. Ignored if "Custom launch template" is provided. If left blank, no keypair will be associsated with the nodes.
+    Type: String
+    Default: ""
   NodeGroupOS:
     AllowedValues:
       - 'Amazon Linux 2'
@@ -234,6 +235,7 @@ Conditions:
   CreateNodeGroup: !Equals [ !Ref CreateNodeGroup, 'Yes' ]
   CreateManagedNodeGroup: !And [ !Condition IsManaged, !Condition CreateNodeGroup ]
   CreateUnmanagedNodeGroup: !And [ !Condition IsUnmanaged, !Condition CreateNodeGroup ]
+  UseKeyPair: !Not [ !Equals [ !Ref KeyPairName, "" ] ]
 Mappings:
   Config:
     Prefix: { Value: 'eks-quickstart' }
@@ -417,7 +419,7 @@ Resources:
               VolumeType: gp2
               DeleteOnTermination: true
         IamInstanceProfile: !If [IsUnmanaged, {Arn: !Ref NodeInstanceProfileArn}, !Ref 'AWS::NoValue']
-        KeyName: !Ref KeyPairName
+        KeyName: !If [UseKeyPair, !Ref KeyPairName, !Ref 'AWS::NoValue']
         NetworkInterfaces:
           - DeviceIndex: 0
             AssociatePublicIpAddress: false
