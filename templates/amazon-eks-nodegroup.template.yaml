@@ -1149,6 +1149,18 @@ Rules:
             - g5g.8xlarge
             - g5g.16xlarge
             - g5g.metal
+            - im4gn.large
+            - im4gn.xlarge
+            - im4gn.2xlarge
+            - im4gn.4xlarge
+            - im4gn.8xlarge
+            - im4gn.16xlarge
+            - is4gen.medium
+            - is4gen.large
+            - is4gen.xlarge
+            - is4gen.2xlarge
+            - is4gen.4xlarge
+            - is4gen.8xlarge
             - m6g.medium
             - m6g.large
             - m6g.xlarge
@@ -1210,6 +1222,8 @@ Rules:
           "c6gn.medium", "c6gn.large", "c6gn.xlarge", "c6gn.2xlarge", "c6gn.4xlarge", "c6gn.8xlarge", "c6gn.12xlarge", "c6gn.16xlarge", "c6gn.metal",
           "c7g.medium", "c7g.large", "c7g.xlarge", "c7g.2xlarge", "c7g.4xlarge", "c7g.8xlarge", "c7g.12xlarge", "c7g.16xlarge",
           "g5g.xlarge", "g5g.2xlarge", "g5g.4xlarge", "g5g.8xlarge", "g5g.16xlarge", "g5g.metal",
+          "im4gn.large", "im4gn.xlarge", "im4gn.2xlarge", "im4gn.4xlarge", "im4gn.8xlarge", "im4gn.16xlarge",
+          "is4gen.medium", "is4gen.large", "is4gen.xlarge", "is4gen.2xlarge", "is4gen.4xlarge", "is4gen.8xlarge",
           "m6g.medium", "m6g.large", "m6g.xlarge", "m6g.2xlarge", "m6g.4xlarge", "m6g.8xlarge", "m6g.12xlarge", "m6g.16xlarge", "m6g.metal",
           "m6gd.medium", "m6gd.large", "m6gd.xlarge", "m6gd.2xlarge", "m6gd.4xlarge", "m6gd.8xlarge", "m6gd.12xlarge", "m6gd.16xlarge", "m6gd.metal",
           "r6g.medium", "r6g.large", "r6g.xlarge", "r6g.2xlarge", "r6g.4xlarge", "r6g.8xlarge", "r6g.12xlarge", "r6g.16xlarge", "r6g.metal",
