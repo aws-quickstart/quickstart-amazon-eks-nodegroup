@@ -317,12 +317,6 @@ Parameters:
       - i4i.16xlarge
       - i4i.32xlarge
       - i4i.metal
-      - is4gen.medium
-      - is4gen.large
-      - is4gen.xlarge
-      - is4gen.2xlarge
-      - is4gen.4xlarge
-      - is4gen.8xlarge
       - im4gn.large
       - im4gn.xlarge
       - im4gn.2xlarge
@@ -333,6 +327,12 @@ Parameters:
       - inf1.2xlarge
       - inf1.6xlarge
       - inf1.24xlarge
+      - is4gen.medium
+      - is4gen.large
+      - is4gen.xlarge
+      - is4gen.2xlarge
+      - is4gen.4xlarge
+      - is4gen.8xlarge
       - m1.small
       - m1.medium
       - m1.large
