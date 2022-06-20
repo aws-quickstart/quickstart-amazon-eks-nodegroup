@@ -1236,38 +1236,60 @@ Rules:
   GpuInstance:
     Assertions:
       - Assert: !Contains
-          - - inf1.xlarge
+          - - g2.2xlarge
+            - g2.8xlarge
+            - g3.4xlarge
+            - g3.8xlarge
+            - g3.16xlarge
+            - g3s.xlarge
+            - g4ad.xlarge
+            - g4ad.2xlarge
+            - g4ad.4xlarge
+            - g4ad.8xlarge
+            - g4ad.12xlarge
+            - g4ad.16xlarge
+            - g4ad.metal
+            - g4dn.xlarge
+            - g4dn.2xlarge
+            - g4dn.4xlarge
+            - g4dn.8xlarge
+            - g4dn.12xlarge
+            - g4dn.16xlarge
+            - g4dn.metal
+            - g5.xlarge
+            - g5.2xlarge
+            - g5.4xlarge
+            - g5.8xlarge
+            - g5.12xlarge
+            - g5.16xlarge
+            - g5.24xlarge
+            - g5.48xlarge
+            - inf1.xlarge
             - inf1.2xlarge
             - inf1.6xlarge
             - inf1.24xlarge
-            - g4dn.xlarge
-            - g2.2xlarge
-            - g3s.xlarge
-            - g4dn.2xlarge
             - p2.xlarge
-            - g3.4xlarge
-            - g4dn.4xlarge
-            - p3.8xlarge
-            - p2.16xlarge
-            - g4dn.8xlarge
-            - g3.8xlarge
-            - g2.8xlarge
-            - p3.16xlarge
-            - p3.2xlarge
-            - g4dn.12xlarge
-            - p3dn.24xlarge
-            - g4dn.16xlarge
-            - g3.16xlarge
             - p2.8xlarge
-            - g4dn.metal
+            - p2.16xlarge
+            - p3.2xlarge
+            - p3.8xlarge
+            - p3.16xlarge
+            - p3dn.24xlarge
+            - p4d.24xlarge
           - !Ref 'NodeInstanceType'
         AssertDescription: >-
-          Valid instance types for the GPU instance family are: "inf1.xlarge", "inf1.2xlarge",
-          "inf1.6xlarge", "inf1.24xlarge", "g4dn.xlarge", "g2.2xlarge", "g3s.xlarge",
-          "g4dn.2xlarge", "p2.xlarge", "g3.4xlarge", "g4dn.4xlarge", "p3.8xlarge",
-          "p2.16xlarge", "g4dn.8xlarge", "g3.8xlarge", "g2.8xlarge", "p3.16xlarge",
-          "p3.2xlarge", "g4dn.12xlarge", "p3dn.24xlarge", "g4dn.16xlarge", "g3.16xlarge",
-          "p2.8xlarge", "g4dn.metal"
+          Valid instance types for the GPU instance family are:
+          "g2.2xlarge", "g2.8xlarge",
+          "g3.4xlarge", "g3.8xlarge", "g3.16xlarge",
+          "g3s.xlarge",
+          "g4ad.xlarge", "g4ad.2xlarge", "g4ad.4xlarge", "g4ad.8xlarge", "g4ad.12xlarge", "g4ad.16xlarge", "g4ad.metal",
+          "g4dn.xlarge", "g4dn.2xlarge", "g4dn.4xlarge", "g4dn.8xlarge", "g4dn.12xlarge", "g4dn.16xlarge", "g4dn.metal",
+          "g5.xlarge", "g5.2xlarge", "g5.4xlarge", "g5.8xlarge", "g5.12xlarge", "g5.16xlarge", "g5.24xlarge", "g5.48xlarge",
+          "inf1.xlarge", "inf1.2xlarge", "inf1.6xlarge", "inf1.24xlarge",
+          "p2.xlarge", "p2.8xlarge", "p2.16xlarge",
+          "p3.2xlarge", "p3.8xlarge", "p3.16xlarge",
+          "p3dn.24xlarge",
+          "p4d.24xlarge"
     RuleCondition: !Equals
       - !Ref 'NodeInstanceFamily'
       - GPU
