@@ -982,6 +982,12 @@ Resources:
   NodeLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Condition: CreateNodeGroup
+    Metadata:
+      cfn-lint:
+        config:
+          ignore_checks: [E3008]
+          ignore_reasons:
+            - E3008: IamInstanceProfile Arn resource refs are necessary.
     Properties:
       LaunchTemplateData:
         BlockDeviceMappings:
