@@ -69,7 +69,7 @@ Metadata:
     NodeInstanceType:
       InstanceFilters:
        - [['PV'], "!=", "SupportedVirtualizationTypes"]
-  cfn-lint: { config: { ignore_checks: [W2030, W9002, W9003, W9004, E3008, W9006]}}
+  cfn-lint: { config: { ignore_checks: [W9002, W9003]}}
 Parameters:
   KeyPairName:
     Description: Name of an existing EC2 key pair. All instances will launch with this key pair. Ignored if "Custom launch template" is provided. If left blank, no keypair will be associsated with the nodes.
