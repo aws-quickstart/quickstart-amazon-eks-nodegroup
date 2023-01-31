@@ -764,9 +764,9 @@ Parameters:
     Description: 'The edition of Windows AMI to use for Windows Nodegroups.'
   WindowsVersion:
     Type: String
-    AllowedValues: ['2019']
-    Default: '2019'
-    Description: 'The version of windows to use for Windows Nodegroups.'
+    Description: The version of windows to use for Windows Nodegroups.
+    AllowedValues: [2019, 2022]
+    Default: 2022
   EC2MetadataPutResponseHopLimit:
     Type: String
     Default: "1"
