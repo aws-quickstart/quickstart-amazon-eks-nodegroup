@@ -617,8 +617,9 @@ Resources:
         BlockDeviceMappings:
           - DeviceName: !Ref AmiRootVolumeDeviceName
             Ebs:
-              VolumeSize: !Ref NodeVolumeSize
               VolumeType: gp2
+              VolumeSize: !Ref NodeVolumeSize
+              Encrypted: true
               DeleteOnTermination: true
         IamInstanceProfile: !If [IsUnmanaged, { Arn: !Ref GetNodeInstanceProfileArn }, !Ref AWS::NoValue]
         KeyName: !If [UseKeyPair, !Ref KeyPairName, !Ref AWS::NoValue]
