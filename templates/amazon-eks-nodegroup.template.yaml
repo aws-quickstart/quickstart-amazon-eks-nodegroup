@@ -41,6 +41,7 @@ Metadata:
           - NodeInstanceType4
           - NodeGroupOS
           - CustomAmiId
+          - AmiRootVolumeDeviceName
           - NodeVolumeSize
           - Labels
       - Label:
@@ -104,6 +105,8 @@ Metadata:
         default: Node volume size
       CustomAmiId:
         default: Custom AMI id
+      AmiRootVolumeDeviceName:
+        default: AMI root volume device name
       HttpProxy:
         default: HTTP proxy
       CreateNodeGroup:
@@ -149,6 +152,13 @@ Parameters:
       (Optional) If an AMI id is specified here it will be used in stead of the
       ami determined from the OS/region.
     Default: ''
+  AmiRootVolumeDeviceName:
+    Type: String
+    Description: >-
+      Device name for the root volume
+      https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/device_naming.html.
+    AllowedValues: [/dev/xvda, /dev/sda1]
+    Default: /dev/xvda
   VPCID:
     Type: AWS::EC2::VPC::Id
     Description: >-
@@ -464,7 +474,6 @@ Conditions:
   UseMaxNodesUnavailable: !And
     - !Not [!Condition UseMaxNodesUnavailablePercentage]
     - !Not [!Equals [!Ref MaxNodesUnavailable, 0]]
-
 Resources:
   GetVpcCidr:
     Type: Custom::ResourceReader
@@ -606,10 +615,11 @@ Resources:
     Properties:
       LaunchTemplateData:
         BlockDeviceMappings:
-          - DeviceName: /dev/xvda
+          - DeviceName: !Ref AmiRootVolumeDeviceName
             Ebs:
-              VolumeSize: !Ref NodeVolumeSize
               VolumeType: gp2
+              VolumeSize: !Ref NodeVolumeSize
+              Encrypted: true
               DeleteOnTermination: true
         IamInstanceProfile: !If [IsUnmanaged, { Arn: !Ref GetNodeInstanceProfileArn }, !Ref AWS::NoValue]
         KeyName: !If [UseKeyPair, !Ref KeyPairName, !Ref AWS::NoValue]
